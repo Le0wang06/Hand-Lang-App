@@ -3,9 +3,16 @@ import cv2
 # Open the default camera
 cam = cv2.VideoCapture(0)
 
+# Check if camera opened successfully
+if not cam.isOpened():
+    print("Error: Could not open camera")
+    exit()
+
 # Get the default frame width and height
 frame_width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+print(f"Camera opened successfully. Resolution: {frame_width}x{frame_height}")
 
 # Define the codec and create VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -13,6 +20,10 @@ out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (frame_width, frame_height))
 
 while True:
     ret, frame = cam.read()
+    
+    if not ret:
+        print("Error: Failed to grab frame")
+        break
 
     # Write the frame to the output file
     out.write(frame)
