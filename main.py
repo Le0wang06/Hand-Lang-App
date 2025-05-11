@@ -25,6 +25,9 @@ while True:
         print("Error: Failed to grab frame")
         break
 
+    # Flip the frame horizontally
+    frame = cv2.flip(frame, 1)
+
     # Write the frame to the output file
     out.write(frame)
 
