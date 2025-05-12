@@ -14,6 +14,9 @@ while True:
     if not success:
         break
 
+    # Flip the frame horizontally
+    frame = cv2.flip(frame, 1)
+
     # Convert frame to RGB (MediaPipe needs RGB input)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
