@@ -17,6 +17,11 @@ while True:
     # Flip the frame horizontally
     frame = cv2.flip(frame, 1)
 
+    # Add text overlays
+    cv2.putText(frame, "Hi there!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(frame, "Hand Tracking Active", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    cv2.putText(frame, "Press 'q' to quit", (10, frame.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
     # Convert frame to RGB (MediaPipe needs RGB input)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -28,6 +33,8 @@ while True:
         for hand_landmarks in result.multi_hand_landmarks:
             # Draw landmarks and connections on the original frame
             mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+            # Add text when hands are detected
+            cv2.putText(frame, "Hand Detected!", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
     # Show the output
     cv2.imshow("Hand Tracking", frame)
