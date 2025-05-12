@@ -29,6 +29,7 @@ while True:
     cv2.imshow('Camera', frame)
 
     # Press 'q' to exit
+    
     if cv2.waitKey(1) == ord('q'):
         break
 
