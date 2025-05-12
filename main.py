@@ -1,38 +1,37 @@
 import cv2
+import mediapipe as mp
 
-# Open the default camera
-cam = cv2.VideoCapture(0)
+# Initialize MediaPipe Hands Module
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands(max_num_hands=2, min_detection_confidence=0.7)
+mp_draw = mp.solutions.drawing_utils
 
-# Check if camera opened successfully
-if not cam.isOpened():
-    print("Error: Could not open camera")
-    exit()
-
-# Get the default frame width and height
-frame_width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
-frame_height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-print(f"Camera opened successfully. Resolution: {frame_width}x{frame_height}")
-print("Press 'q' to quit")
+# Open the default webcam
+cap = cv2.VideoCapture(0)
 
 while True:
-    ret, frame = cam.read()
-    
-    if not ret:
-        print("Error: Failed to grab frame")
+    success, frame = cap.read()
+    if not success:
         break
 
-    # Flip the frame horizontally
-    frame = cv2.flip(frame, 1)
+    # Convert frame to RGB (MediaPipe needs RGB input)
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    # Display the captured frame
-    cv2.imshow('Camera', frame)
+    # Process the frame to detect hands
+    result = hands.process(rgb_frame)
 
-    # Press 'q' to exit
-    
-    if cv2.waitKey(1) == ord('q'):
+    # If hands are detected
+    if result.multi_hand_landmarks:
+        for hand_landmarks in result.multi_hand_landmarks:
+            # Draw landmarks and connections on the original frame
+            mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
+    # Show the output
+    cv2.imshow("Hand Tracking", frame)
+
+    # Exit when 'q' is pressed
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# Release the capture
-cam.release()
+cap.release()
 cv2.destroyAllWindows()
