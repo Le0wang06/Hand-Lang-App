@@ -8,21 +8,23 @@ import time
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Initialize MediaPipe
+# Initialize MediaPipe with optimized settings
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(
     max_num_hands=2,
     min_detection_confidence=0.7,
-    min_tracking_confidence=0.5
+    min_tracking_confidence=0.5,
+    model_complexity=0  # Use faster model
 )
 mp_draw = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 
-# Initialize camera
+# Initialize camera with optimized settings
 camera = cv2.VideoCapture(0)
 camera.set(cv2.CAP_PROP_FPS, 30)
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 960)  # Reduced resolution
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 540)  # Reduced resolution
+camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimize buffer size
 
 def generate_frames():
     while True:
@@ -50,8 +52,9 @@ def generate_frames():
                         mp_drawing_styles.get_default_hand_connections_style()
                     )
             
-            # Convert frame to JPEG
-            ret, buffer = cv2.imencode('.jpg', frame)
+            # Optimize JPEG encoding
+            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 85]
+            ret, buffer = cv2.imencode('.jpg', frame, encode_param)
             frame = buffer.tobytes()
             
             yield (b'--frame\r\n'
@@ -75,4 +78,4 @@ def hand_count():
     return jsonify({"count": count})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True) 
+    app.run(host='0.0.0.0', port=8080, debug=True, threaded=True) 
