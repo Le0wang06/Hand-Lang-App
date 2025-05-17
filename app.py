@@ -1,10 +1,9 @@
-from flask import Flask, render_template, Response, jsonify
+from flask import Flask, Response, jsonify
 from flask_cors import CORS
 import cv2
 import mediapipe as mp
 import numpy as np
 import time
-import json
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -41,9 +40,7 @@ def generate_frames():
             results = hands.process(rgb_frame)
             
             # Draw hand landmarks
-            hand_count = 0
             if results.multi_hand_landmarks:
-                hand_count = len(results.multi_hand_landmarks)
                 for hand_landmarks in results.multi_hand_landmarks:
                     mp_draw.draw_landmarks(
                         frame,
@@ -53,20 +50,12 @@ def generate_frames():
                         mp_drawing_styles.get_default_hand_connections_style()
                     )
             
-            # Add text overlay
-            cv2.putText(frame, f"Hands: {hand_count}", (10, 30), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            
             # Convert frame to JPEG
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-@app.route('/')
-def index():
-    return render_template('camera.html')
 
 @app.route('/video_feed')
 def video_feed():
