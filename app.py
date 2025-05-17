@@ -19,8 +19,8 @@ mp_drawing_styles = mp.solutions.drawing_styles
 # Initialize camera
 camera = cv2.VideoCapture(0)
 camera.set(cv2.CAP_PROP_FPS, 30)
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 def generate_frames():
     while True:
