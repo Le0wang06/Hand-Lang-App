@@ -1,10 +1,13 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, jsonify
+from flask_cors import CORS
 import cv2
 import mediapipe as mp
 import numpy as np
 import time
+import json
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Initialize MediaPipe
 mp_hands = mp.solutions.hands
@@ -38,7 +41,9 @@ def generate_frames():
             results = hands.process(rgb_frame)
             
             # Draw hand landmarks
+            hand_count = 0
             if results.multi_hand_landmarks:
+                hand_count = len(results.multi_hand_landmarks)
                 for hand_landmarks in results.multi_hand_landmarks:
                     mp_draw.draw_landmarks(
                         frame,
@@ -49,7 +54,7 @@ def generate_frames():
                     )
             
             # Add text overlay
-            cv2.putText(frame, "Hand Tracking Active", (10, 30), 
+            cv2.putText(frame, f"Hands: {hand_count}", (10, 30), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
             
             # Convert frame to JPEG
@@ -67,6 +72,18 @@ def index():
 def video_feed():
     return Response(generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/api/hand-count')
+def hand_count():
+    success, frame = camera.read()
+    if not success:
+        return jsonify({"error": "Failed to read frame"}), 500
+    
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = hands.process(rgb_frame)
+    
+    count = len(results.multi_hand_landmarks) if results.multi_hand_landmarks else 0
+    return jsonify({"count": count})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True) 
