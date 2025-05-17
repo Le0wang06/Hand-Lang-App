@@ -29,6 +29,23 @@ function App() {
     updateFPS()
   }, [])
 
+  useEffect(() => {
+    if (!isStreaming) return
+
+    const fetchHandCount = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/hand-count')
+        const data = await response.json()
+        setHandCount(data.count)
+      } catch (error) {
+        console.error('Error fetching hand count:', error)
+      }
+    }
+
+    const interval = setInterval(fetchHandCount, 100)
+    return () => clearInterval(interval)
+  }, [isStreaming])
+
   return (
     <div className="min-h-screen bg-secondary">
       <div className="container mx-auto px-4 py-8">
