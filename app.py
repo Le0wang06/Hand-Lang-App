@@ -11,6 +11,8 @@ mp_styles = mp.solutions.drawing_styles
 
 # --- Camera Setup (singleton) ---
 camera = cv2.VideoCapture(0)
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
 if not camera.isOpened():
     raise RuntimeError("Could not open camera.")
 
@@ -19,7 +21,7 @@ def generate_frames():
         max_num_hands=2,
         min_detection_confidence=0.7,
         min_tracking_confidence=0.5,
-        model_complexity=1
+        model_complexity=0
     ) as hands:
         prev_time = time.time()
         while True:
@@ -50,11 +52,12 @@ def generate_frames():
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.putText(frame, f'FPS: {int(fps)}', (10, 75),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            # Encode as JPEG
-            ret, buffer = cv2.imencode('.jpg', frame)
+            # Lower JPEG quality for speed
+            ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    camera.release()
 
 @app.route('/')
 def index():
