@@ -16,6 +16,22 @@ camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
 if not camera.isOpened():
     raise RuntimeError("Could not open camera.")
 
+def classify_hand_sign(landmarks):
+    if not landmarks:
+        return "No Hand"
+    tips = [landmarks[i] for i in [4, 8, 12, 16, 20]]
+    palm = landmarks[0]
+    if all(abs(tip[1] - palm[1]) < 0.1 for tip in tips):
+        return "Fist"
+    if all(abs(tip[1] - palm[1]) > 0.3 for tip in tips):
+        return "Open Palm"
+    if (abs(landmarks[8][1] - palm[1]) > 0.3 and
+        abs(landmarks[12][1] - palm[1]) > 0.3 and
+        abs(landmarks[16][1] - palm[1]) < 0.15 and
+        abs(landmarks[20][1] - palm[1]) < 0.15):
+        return "Peace"
+    return "Unknown"
+
 def generate_frames():
     with mp_hands.Hands(
         max_num_hands=2,
@@ -31,9 +47,8 @@ def generate_frames():
             frame = cv2.flip(frame, 1)
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             results = hands.process(rgb)
-            # Count hands
             num_hands = len(results.multi_hand_landmarks) if results.multi_hand_landmarks else 0
-            # Draw hand landmarks
+            sign_text = "No Hand"
             if results.multi_hand_landmarks:
                 for hand_landmarks in results.multi_hand_landmarks:
                     mp_drawing.draw_landmarks(
@@ -43,16 +58,18 @@ def generate_frames():
                         mp_styles.get_default_hand_landmarks_style(),
                         mp_styles.get_default_hand_connections_style()
                     )
-            # FPS overlay
+                    h, w, _ = frame.shape
+                    landmarks = [(lm.x, lm.y) for lm in hand_landmarks.landmark]
+                    sign_text = classify_hand_sign(landmarks)
             curr_time = time.time()
             fps = 1 / (curr_time - prev_time) if curr_time != prev_time else 0
             prev_time = curr_time
-            # Overlay number of hands and FPS
             cv2.putText(frame, f'Hands: {num_hands}', (10, 35),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.putText(frame, f'FPS: {int(fps)}', (10, 75),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            # High JPEG quality, but not max
+            cv2.putText(frame, f'Sign: {sign_text}', (10, 115),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 255), 2)
             ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
