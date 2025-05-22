@@ -21,6 +21,7 @@ Hand-Lang-App captures your hand gestures via webcam and translates them into re
 - Mediapipe (for hand tracking)
 - HTML + CSS + JS
 
+
 ## 🧪 How to Run
 
 1. **Clone this repo**  
