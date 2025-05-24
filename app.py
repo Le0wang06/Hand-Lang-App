@@ -57,12 +57,18 @@ def generate_frames():
                         mp_styles.get_default_hand_connections_style()
                     )
                     
-                    # Add landmark numbers
+                    # Add landmark numbers and coordinates
                     h, w, _ = frame.shape
                     for idx, landmark in enumerate(hand_landmarks.landmark):
                         cx, cy = int(landmark.x * w), int(landmark.y * h)
+                        # Display landmark number
                         cv2.putText(frame, str(idx), (cx, cy), 
                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
+                        
+                        # Display coordinates below the landmark number
+                        coord_text = f"x:{landmark.x:.2f} y:{landmark.y:.2f} z:{landmark.z:.2f}"
+                        cv2.putText(frame, coord_text, (cx, cy + 15), 
+                                  cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1)
 
             curr_time = time.time()
             fps = 1 / (curr_time - prev_time) if curr_time != prev_time else 0
