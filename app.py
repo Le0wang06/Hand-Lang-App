@@ -3,6 +3,7 @@ import cv2
 import mediapipe as mp
 import time
 import numpy as np
+import os
 
 app = Flask(__name__)
 
@@ -16,6 +17,18 @@ camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
 if not camera.isOpened():
     raise RuntimeError("Could not open camera.")
+
+def clear_terminal():
+    """Clear terminal screen based on OS."""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def print_landmarks(hand_landmarks, hand_num):
+    """Print landmarks to terminal in a formatted way."""
+    print(f"\n=== Hand {hand_num + 1} Landmarks ===")
+    print("Index | X      | Y      | Z      | Visibility")
+    print("-" * 45)
+    for idx, landmark in enumerate(hand_landmarks.landmark):
+        print(f"{idx:5d} | {landmark.x:6.3f} | {landmark.y:6.3f} | {landmark.z:6.3f} | {landmark.visibility:6.3f}")
 
 def process_hand_landmarks(hand_landmarks):
     """Process hand landmarks and return normalized coordinates."""
@@ -47,7 +60,11 @@ def generate_frames():
             num_hands = len(results.multi_hand_landmarks) if results.multi_hand_landmarks else 0
             
             if results.multi_hand_landmarks:
-                for hand_landmarks in results.multi_hand_landmarks:
+                # Clear terminal and print new coordinates
+                clear_terminal()
+                for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
+                    print_landmarks(hand_landmarks, i)
+                    
                     # Draw landmarks on frame
                     mp_drawing.draw_landmarks(
                         frame,
