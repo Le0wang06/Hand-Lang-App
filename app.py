@@ -7,6 +7,8 @@ import os
 
 app = Flask(__name__)
 
+collected_data = []  # List of [x1, y1, z1, ..., x21, y21, z21, label]
+
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 mp_styles = mp.solutions.drawing_styles
