@@ -168,6 +168,38 @@ import atexit
 def cleanup():
     if camera.isOpened():
         camera.release()
+        
+@app.route('/collect_sample', methods=['POST'])
+def collect_sample():
+    from flask import request
+    label = request.args.get('label')
+    if not label:
+        return jsonify({"error": "Missing label"}), 400
+
+    success, frame = camera.read()
+    if not success:
+        return jsonify({"error": "Could not read frame"}), 500
+
+    frame = cv2.flip(frame, 1)
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    with mp_hands.Hands(
+        max_num_hands=1,
+        min_detection_confidence=0.7,
+        min_tracking_confidence=0.5
+    ) as hands:
+        results = hands.process(rgb)
+        if not results.multi_hand_landmarks:
+            return jsonify({"error": "No hand detected"}), 400
+
+        hand_landmarks = results.multi_hand_landmarks[0]
+        row = []
+        for lm in hand_landmarks.landmark:
+            row += [lm.x, lm.y, lm.z]
+
+        row.append(label)
+        collected_data.append(row)
+        return jsonify({"status": "sample collected", "label": label, "total": len(collected_data)})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050, debug=True) 
