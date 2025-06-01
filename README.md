@@ -6,7 +6,7 @@ Real-time hand gesture recognition for translating sign language into text — p
 
 Hand-Lang-App captures your hand gestures via webcam and translates them into readable text using a trained machine learning model. It's built to bridge communication gaps and make sign language more accessible.
 
-## 🚀 Features
+## 🚀 Features 
 
 - 🔍 Real-time hand tracking
 - 🧠 Sign language interpretation
