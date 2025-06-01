@@ -11,7 +11,7 @@ Hand-Lang-App captures your hand gestures via webcam and translates them into re
 - 🔍 Real-time hand tracking
 - 🧠 Sign language interpretation
 - 🖥️ Simple and clean web interface
-- 🌐 Runs locally in your browser
+- 🌐 Runs locally in your browser 
 
 ## 🛠️ Tech Stack
 
